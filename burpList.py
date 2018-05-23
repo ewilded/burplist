@@ -100,12 +100,16 @@ class BurpExtender(IBurpExtender,IContextMenuFactory,JFrame):
 		i=0
 		for straffic in http_sitemap_traffic:
 			http_response = straffic.getResponse()
-
+			i=i+1
+			# make sure the object is valid AND the mime type is text/whatever
 			if http_response != None:
-				words = self.handleTraffic(http_response)
-				i=i+1
-				self.wordlist.extend(words)
-			print "Processed "+str(i)+" requests"
+				if self._helpers.analyzeResponse(http_response).getStatedMimeType().find("HTML")>-1:
+					words = self.handleTraffic(http_response)
+					self.wordlist.extend(words)
+					print "New words added"
+				else:
+					print "Skipped due an unsupported MIME type "+self._helpers.analyzeResponse(http_response).getStatedMimeType()
+			print "Processed "+str(i)+" requests."
 	    else:
         	http_response = traffic.getResponse()
         	if http_response:
